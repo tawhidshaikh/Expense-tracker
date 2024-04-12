@@ -1,64 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Task List 2021</title>
-
-	<link rel="stylesheet" href="main.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Form</title>
+    <link rel="stylesheet" href="main.css" />
 </head>
 <body>
-	
-	<header>
-		<h1>Expense Tracker</h1>
-		<form id="new-task-form">
-			<input 
-				type="number" 
-				name="new-task-cost" 
-				id="new-task-cost" 
-				placeholder="Amount" />
-			<input 
-				type="text" 
-				name="new-task-input" 
-				id="new-task-input" 
-				placeholder="Where did you spend?" />
-			<input 
-				type="text" 
-				name="new-task-category" 
-				id="new-task-category" 
-				placeholder="Category of expense" />
-			
-			<input 	
-				type="submit"
-				id="new-task-submit" 
-				value="Add task" />
-		</form>
-	</header>
-	<main>
-		<section class="task-list">
-			<h2>Expenses</h2>
+    <h1>Order Form</h1>
+    <form id="order-form">
+        <div>
+            <label for="dish-input">Dish:</label>
+            <input type="text" id="dish-input" name="dish">
+        </div>
+        <div>
+            <label for="price-input">Price:</label>
+            <input type="number" id="price-input" name="price" step="0.01">
+        </div>
+        <div>
+            <label for="table-select">Table Number:</label>
+            <select id="table-select" name="table">
+                <option value="1">Table 1</option>
+                <option value="2">Table 2</option>
+                <option value="3">Table 3</option>
+            </select>
+        </div>
+        <button type="submit">Add to Bill</button>
+    </form>
 
-			<div id="tasks">
-
-				<!-- <div class="task">
-					<div class="content">
-						<input 
-							type="text" 
-							class="text" 
-							value="A new task"
-							readonly>
-					</div>
-					<div class="actions">
-						<button class="edit">Edit</button>
-						<button class="delete">Delete</button>
-					</div>
-				</div> -->
-
-			</div>
-		</section>
-	</main>
-
-	<script src="main.js"></script>
+    <div id="table-1" class="table">
+        <h2>Table 1</h2>
+    </div>
+    <div id="table-2" class="table">
+        <h2>Table 2</h2>
+    </div>
+    <div id="table-3" class="table">
+        <h2>Table 3</h2>
+    </div>
+    <script src="main.js"></script>
 </body>
 </html>

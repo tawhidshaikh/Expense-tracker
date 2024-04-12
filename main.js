@@ -1,162 +1,93 @@
-window.addEventListener('load', () => {
-	const form = document.querySelector("#new-task-form");
-	const input = document.querySelector("#new-task-input");
-	const costinput = document.querySelector("#new-task-cost");
-	const categoryinput = document.querySelector("#new-task-category");
-	const list_el = document.querySelector("#tasks");
-	const apiUrl = 'https://crudcrud.com/api/394adcc78bc141fbbb98a07024fa03e2/tasks';
+        const API_URL = 'https://crudcrud.com/api/6b06424d642342c0a9863f77d2378c6a/orders';
+        
 
-	// Function to fetch tasks from API and display
-	async function fetchAndDisplayTasks() {
-		try {
-			const response = await fetch(apiUrl);
-			if (!response.ok) {
-				throw new Error('Failed to fetch tasks');
-			}
-			const tasks = await response.json();
-			list_el.innerHTML = ''; // Clear existing tasks
-			tasks.forEach(task => {
-				const task_el = createTaskElement(task);
-				list_el.appendChild(task_el);
-			});
-		} catch (error) {
-			console.error('Error fetching tasks:', error);
-		}
-	}
+        async function fetchAndPopulateOrders() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+                const orders = await response.json();
+                orders.forEach(order => {
+                    appendOrderToTable(order);
+                });
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
+        }
 
-	// Function to create task element
-	function createTaskElement(task) {
-		const task_el = document.createElement('div');
-		task_el.classList.add('task');
 
-		const task_content_el = document.createElement('div');
-		task_content_el.classList.add('content');
+        function appendOrderToTable(order) {
+            const orderElement = document.createElement('div');
+            orderElement.classList.add('order');
+            orderElement.textContent = `Dish: ${order.dish}, Price: ${order.price.toFixed(2)}`;
 
-		const task_input_el = document.createElement('input');
-		task_input_el.classList.add('text');
-		task_input_el.type = 'text';
-		task_input_el.value = task.task;
-		task_input_el.setAttribute('readonly', 'readonly');
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('delete-btn');
+            deleteBtn.textContent = 'X';
+            deleteBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch(`${API_URL}/${order._id}`, {
+                        method: 'DELETE'
+                    });
+                    if (!response.ok) {
+                        throw new Error('Failed to delete order');
+                    }
+                    orderElement.remove();
+                } catch (error) {
+                    console.error('Error deleting order:', error);
+                }
+            });
 
-		const task_costinput_el = document.createElement('input');
-		task_costinput_el.classList.add('text');
-		task_costinput_el.type = 'number';
-		task_costinput_el.value = task.cost;
-		task_costinput_el.setAttribute('readonly', 'readonly');
+            orderElement.appendChild(deleteBtn);
 
-		const task_categoryinput_el = document.createElement('input');
-		task_categoryinput_el.classList.add('text');
-		task_categoryinput_el.type = 'text';
-		task_categoryinput_el.value = task.category;
-		task_categoryinput_el.setAttribute('readonly', 'readonly');
+            const tableDiv = document.getElementById(`table-${order.tableNumber}`);
+            tableDiv.appendChild(orderElement);
+        }
 
-		task_content_el.appendChild(task_input_el);
-		task_content_el.appendChild(task_costinput_el);
-		task_content_el.appendChild(task_categoryinput_el);
 
-		const task_actions_el = document.createElement('div');
-		task_actions_el.classList.add('actions');
+        window.addEventListener('load', fetchAndPopulateOrders);
 
-		const task_edit_el = document.createElement('button');
-		task_edit_el.classList.add('edit');
-		task_edit_el.innerText = 'Edit';
+        document.getElementById('order-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const dish = document.getElementById('dish-input').value;
+            const price = parseFloat(document.getElementById('price-input').value);
+            const tableNumber = document.getElementById('table-select').value;
 
-		const task_delete_el = document.createElement('button');
-		task_delete_el.classList.add('delete');
-		task_delete_el.innerText = 'Delete';
 
-		task_actions_el.appendChild(task_edit_el);
-		task_actions_el.appendChild(task_delete_el);
+            if (!dish || !price || !tableNumber) {
+                alert('Please fill in all fields');
+                return;
+            }
 
-		task_el.appendChild(task_content_el);
-		task_el.appendChild(task_actions_el);
+            try {
 
-		// Event listener for editing task
-		task_edit_el.addEventListener('click', async () => {
-			if (task_edit_el.innerText.toLowerCase() === 'edit') {
-				task_edit_el.innerText = 'Save';
-				task_input_el.removeAttribute('readonly');
-				task_input_el.focus();
-				task_costinput_el.removeAttribute('readonly');
-				task_costinput_el.focus();
-				task_categoryinput_el.removeAttribute('readonly');
-				task_categoryinput_el.focus();
-			} else {
-				task_edit_el.innerText = 'Edit';
-				task_input_el.setAttribute('readonly', 'readonly');
-				task_costinput_el.setAttribute('readonly', 'readonly');
-				task_categoryinput_el.setAttribute('readonly', 'readonly');
-				// Update task on server
-				try {
-					const updatedTask = {
-						task: task_input_el.value,
-						cost: task_costinput_el.value,
-						category: task_categoryinput_el.value
-					};
-					const response = await fetch(`${apiUrl}/${task._id}`, {
-						method: 'PUT',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify(updatedTask)
-					});
-					if (!response.ok) {
-						throw new Error('Failed to update task');
-					}
-				} catch (error) {
-					console.error('Error updating task:', error);
-				}
-			}
-		});
+                const orderData = {
+                    dish,
+                    price,
+                    tableNumber
+                };
 
-		// Event listener for deleting task
-		task_delete_el.addEventListener('click', async () => {
-			// Delete task from server
-			try {
-				const response = await fetch(`${apiUrl}/${task._id}`, {
-					method: 'DELETE'
-				});
-				if (!response.ok) {
-					throw new Error('Failed to delete task');
-				}
-				list_el.removeChild(task_el);
-			} catch (error) {
-				console.error('Error deleting task:', error);
-			}
-		});
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
 
-		return task_el;
-	}
+                if (!response.ok) {
+                    throw new Error('Failed to create order');
+                }
 
-	// Event listener for form submission
-	form.addEventListener('submit', async (e) => {
-		e.preventDefault();
-		const task = input.value;
-		const cost = costinput.value;
-		const category = categoryinput.value;
-		// Create task on server
-		try {
-			const response = await fetch(apiUrl, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ task, cost, category })
-			});
-			if (!response.ok) {
-				throw new Error('Failed to create task');
-			}
-			const newTask = await response.json();
-			const task_el = createTaskElement(newTask);
-			list_el.appendChild(task_el);
-			input.value = '';
-			costinput.value = '';
-			categoryinput.value = '';
-		} catch (error) {
-			console.error('Error creating task:', error);
-		}
-	});
 
-	// Fetch and display tasks on page load
-	fetchAndDisplayTasks();
-});
+                const createdOrder = await response.json();
+
+
+                appendOrderToTable(createdOrder);
+
+                this.reset();
+            } catch (error) {
+                console.error('Error creating order:', error);
+            }
+        });
